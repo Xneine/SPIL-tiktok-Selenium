@@ -12,16 +12,15 @@ class Tiktok(webdriver.Chrome):
         os.environ['PATH'] += self.driver_path
         super(Tiktok, self).__init__()
         self.implicitly_wait(5)
-        # self.maximize_window()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.teardown:
-            self.driver.quit()
+            self.quit()
     
     def open_landing_page(self, url):
         print(f"Opening {url}...")
         self.get(url)
-        time.sleep(2)
+        time.sleep(10)
     
     def get_followers(self):
         try:
@@ -37,7 +36,7 @@ class Tiktok(webdriver.Chrome):
                 EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/section/section/div/section[1]/div/div/div[2]/div[2]/div/span/h5'))
             ).text
             print("ok3")
-            time.sleep(8)
+            # time.sleep(8)
             f = int(total_followers.replace(",", ""))
             l = int(total_likes.replace(",", ""))
             v = int(total_videos.replace(",", ""))
