@@ -29,7 +29,7 @@ class Tiktok(webdriver.Firefox):
         print(f"Opening {url}...")
         self.get(url)
         time.sleep(5)
-        self.save_screenshot("page_screenshot.png")
+        # self.save_screenshot("page_screenshot.png")
     
     # def get_followers(self):
     #     try:
