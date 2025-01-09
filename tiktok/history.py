@@ -26,10 +26,6 @@ class Video_History(webdriver.Firefox):
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.teardown:
             self.quit()
-    
-    def open_landing_page(self, url):
-        print(f"Opening {url}...")
-        self.get(url)
         
     def convert_to_integer(self, value):
         try:
@@ -45,114 +41,46 @@ class Video_History(webdriver.Firefox):
         except ValueError:
             print(f"Error converting value: {value}")
             return 0
+    def open_url(self, url):
+        url = self.get(url)
         
-    # def scroll_page(self):
-        """Scroll halaman sampai semua elemen dimuat"""
-        scroll_pause_time = 2
-        last_height = self.execute_script("return document.body.scrollHeight")
-        
-        while True:
-            self.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(scroll_pause_time)
-            
-            new_height = self.execute_script("return document.body.scrollHeight")
-            if new_height == last_height:
-                break
-            last_height = new_height
-
-    # def get_all_videos(self):
-        try:
-            print("Fetching all videos...")
-            
-            time.sleep(5)
-            self.scroll_page()
-            time.sleep(20)
-            self.scroll_page()
-            time.sleep(5)
-            self.scroll_page()
-            time.sleep(5)
-            
-            
-            WebDriverWait(self, 20).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, '[data-e2e="user-post-item"]'))
+    def update_hourly(self,cur):
+        cur.execute("SELECT `id`, `link` FROM `videos`;")
+        existing_links = {row[1] for row in cur.fetchall()}
+        for link in existing_links:
+            # time.sleep(2)
+            print("opening...", link)
+            self.open_url(link)
+            like = WebDriverWait(self, 20).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, '[data-e2e="like-count"]'))
             )
+            print("jumlah like: ", self.convert_to_integer(like.text))
+        # return
+    def update_hourly(self, cur, conn):
+        cur.execute("SELECT `id`, `link` FROM `videos`;")
+        existing_videos = cur.fetchall()
 
-            video_elements = self.find_elements(By.CSS_SELECTOR, '[data-e2e="user-post-item"]')
-            videos = []
+        for video_id, link in existing_videos:
+            try:
+                print("Opening...", link)
+                self.open_url(link)
 
-            for video in video_elements:
-                try:
-                    views = video.find_element(By.CSS_SELECTOR, '[data-e2e="video-views"]').text
-                    views_int = self.convert_to_integer(views)
-                    
-                    like_icon = video.find_element(By.CSS_SELECTOR, '.like-icon')
-                    like = like_icon.find_element(By.XPATH, './following-sibling::strong').text
-                    like_int = self.convert_to_integer(like)
-                    
-                    link = video.find_element(By.TAG_NAME, 'a').get_attribute('href')
-                    description = video.find_element(By.TAG_NAME, 'img').get_attribute('alt')
-                    
-                    videos.append({
-                        'views': views_int,
-                        'link': link,
-                        'like': like_int,
-                        'description': description
-                    })
-                except Exception as e:
-                    print(f"Error fetching video data: {e}")
+                like_element = WebDriverWait(self, 20).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, '[data-e2e="like-count"]'))
+                )
+                likes = self.convert_to_integer(like_element.text)  
+                print(f"Video ID: {video_id}, Likes: {likes}")
 
-            print(f"Found {len(videos)} videos.")
-            return videos
+                # Masukkan data likes ke tabel history dengan foreign key ke video ID
+                # cur.execute(
+                #     """
+                #     INSERT INTO `video_histories` (`video_id`, `likes`)
+                #     VALUES (%s, %s);
+                #     """,
+                #     (video_id, likes)
+                # )
+                # conn.commit()
+                # print("Data successfully saved to history.")
 
-        except Exception as e:
-            print(f"Error in get_all_videos: {e}")
-            return []
-        
-    # def get_newest_videos(self):
-        try:
-            print("Fetching newest videos...")
-
-            WebDriverWait(self, 20).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, '[data-e2e="user-post-item"]'))
-            )
-
-            video_elements = self.find_elements(By.CSS_SELECTOR, '[data-e2e="user-post-item"]')
-            videos = []
-            video_links = set()  # Set untuk memastikan video unik
-
-            for index, video in enumerate(video_elements):
-                if index >= 8:
-                    break
-                try:
-                    link = video.find_element(By.TAG_NAME, 'a').get_attribute('href')
-
-                    if link in video_links:
-                        continue  # Skip jika link sudah ada
-
-                    views = video.find_element(By.CSS_SELECTOR, '[data-e2e="video-views"]').text
-                    views_int = self.convert_to_integer(views)
-
-                    like_icon = video.find_element(By.CSS_SELECTOR, '.like-icon')
-                    like = like_icon.find_element(By.XPATH, './following-sibling::strong').text
-                    like_int = self.convert_to_integer(like)
-
-                    description = video.find_element(By.TAG_NAME, 'img').get_attribute('alt')
-
-                    videos.append({
-                        'views': views_int,
-                        'link': link,
-                        'like': like_int,
-                        'description': description
-                    })
-
-                    video_links.add(link)  # Tambahkan ke set untuk validasi berikutnya
-                except Exception as e:
-                    print(f"Error fetching video data: {e}")
-
-            print(f"Found {len(videos)} unique videos.")
-            return videos
-
-        except Exception as e:
-            print(f"Error in get_all_videos: {e}")
-            return []
-   
+            except Exception as e:
+                print(f"Error processing video {link}: {e}")

@@ -42,10 +42,10 @@ def insert_videos(cur, videos):
         print("oke3")
 
         insert_query = """
-            INSERT INTO `videos` (`Views`, `Likes`, `link`, `Description`)
-            VALUES (%s, %s, %s, %s);
+            INSERT INTO `videos` (`Views`, `link`, `Description`)
+            VALUES (%s, %s, %s);
         """
-        data_to_insert = [(video['views'], video['like'], video['link'], video['description']) for video in new_videos]
+        data_to_insert = [(video['views'], video['link'], video['description']) for video in new_videos]
         print("oke4")
 
         cur.executemany(insert_query, data_to_insert)
@@ -74,8 +74,8 @@ def mysqlconnect():
                         print("Invalid data account received from TikTok.")
                 with Video(teardown=True) as bot_videos:
                     bot_videos.open_landing_page(url=BASE_URL_VIDEOS)
-                    # videos = bot_videos.get_all_videos()
-                    videos = bot_videos.get_newest_videos()
+                    videos = bot_videos.get_all_videos()
+                    # videos = bot_videos.get_newest_videos()
                     if all(videos):
                         insert_videos(cur, videos)
                         conn.commit()

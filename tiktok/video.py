@@ -86,9 +86,9 @@ class Video(webdriver.Firefox):
                     views = video.find_element(By.CSS_SELECTOR, '[data-e2e="video-views"]').text
                     views_int = self.convert_to_integer(views)
                     
-                    like_icon = video.find_element(By.CSS_SELECTOR, '.like-icon')
-                    like = like_icon.find_element(By.XPATH, './following-sibling::strong').text
-                    like_int = self.convert_to_integer(like)
+                    # like_icon = video.find_element(By.CSS_SELECTOR, '.like-icon')
+                    # like = like_icon.find_element(By.XPATH, './following-sibling::strong').text
+                    # like_int = self.convert_to_integer(like)
                     
                     link = video.find_element(By.TAG_NAME, 'a').get_attribute('href')
                     description = video.find_element(By.TAG_NAME, 'img').get_attribute('alt')
@@ -96,7 +96,7 @@ class Video(webdriver.Firefox):
                     videos.append({
                         'views': views_int,
                         'link': link,
-                        'like': like_int,
+                        # 'like': like_int,
                         'description': description
                     })
                 except Exception as e:
