@@ -6,7 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 from selenium.webdriver.firefox.options import Options
 
-class Video(webdriver.Firefox):
+class Video_History(webdriver.Firefox):
     def __init__(self, driver_path=r"C:\SeleniumDrivers", teardown=False):
         self.driver_path = driver_path
         self.teardown = teardown
@@ -19,7 +19,7 @@ class Video(webdriver.Firefox):
         firefox_options.add_argument('--no-sandbox')
         firefox_options.add_argument('--disable-dev-shm-usage')
         # firefox_options.add_argument('--headless')
-        super(Video, self).__init__(options=firefox_options)
+        super(Video_History, self).__init__(options=firefox_options)
         self.implicitly_wait(5)
 
 
@@ -30,7 +30,6 @@ class Video(webdriver.Firefox):
     def open_landing_page(self, url):
         print(f"Opening {url}...")
         self.get(url)
-        # time.sleep(10)
         
     def convert_to_integer(self, value):
         try:
@@ -47,7 +46,7 @@ class Video(webdriver.Firefox):
             print(f"Error converting value: {value}")
             return 0
         
-    def scroll_page(self):
+    # def scroll_page(self):
         """Scroll halaman sampai semua elemen dimuat"""
         scroll_pause_time = 2
         last_height = self.execute_script("return document.body.scrollHeight")
@@ -61,7 +60,7 @@ class Video(webdriver.Firefox):
                 break
             last_height = new_height
 
-    def get_all_videos(self):
+    # def get_all_videos(self):
         try:
             print("Fetching all videos...")
             
@@ -109,7 +108,7 @@ class Video(webdriver.Firefox):
             print(f"Error in get_all_videos: {e}")
             return []
         
-    def get_newest_videos(self):
+    # def get_newest_videos(self):
         try:
             print("Fetching newest videos...")
 
