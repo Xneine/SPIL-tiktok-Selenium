@@ -9,7 +9,7 @@ def update_or_insert_account(cur, result):
     if output:
         try:
             cur.execute(
-                "UPDATE `data` SET `Total Follower` = %s, `Total Likes` = %s, `Total Videos` = %s WHERE DATE(created_at) = CURDATE();",
+                "UPDATE `data` SET `total_follower` = %s, `total_likes` = %s, `total_videos` = %s WHERE DATE(created_at) = CURDATE();",
                 (result[0], result[1], result[2])
             )
             print("Data Updated successfully!")
@@ -18,7 +18,7 @@ def update_or_insert_account(cur, result):
     else:
         try:
             cur.execute(
-                "INSERT INTO `data` (`Total Follower`, `Total Likes`, `Total Videos`) VALUES (%s, %s, %s);",
+                "INSERT INTO `data` (`total_follower`, `total_likes`, `total_videos`) VALUES (%s, %s, %s);",
                 (result[0], result[1], result[2])
             )
             print("Data Inserted successfully!")
@@ -74,8 +74,8 @@ def mysqlconnect():
                         print("Invalid data account received from TikTok.")
                 with Video(teardown=True) as bot_videos:
                     bot_videos.open_landing_page(url=BASE_URL_VIDEOS)
-                    videos = bot_videos.get_all_videos()
-                    # videos = bot_videos.get_newest_videos()
+                    # videos = bot_videos.get_all_videos()
+                    videos = bot_videos.get_newest_videos()
                     if all(videos):
                         insert_videos(cur, videos)
                         conn.commit()
