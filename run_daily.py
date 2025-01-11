@@ -28,31 +28,42 @@ def update_or_insert_account(cur, result):
 def insert_videos(cur, videos):
     try:
         cur.execute("SELECT `link` FROM `videos`;")
-        print("oke1")
-        existing_links = {row[0] for row in cur.fetchall()}
-        if not existing_links:
-            new_videos = [video for video in videos]
-        else:
-            new_videos = [video for video in videos if video['link'] not in existing_links]
-        print("oke2")
+        existing_videos = {row[0] for row in cur.fetchall()}
+        print("Data video di database berhasil diambil.")
 
-        if not new_videos:
-            print("Semua video sudah ada di database. Tidak ada video baru untuk diinsert.")
-            return
-        print("oke3")
+        videos_to_update = [video for video in videos if video['link'] in existing_videos]
+        videos_to_insert = [video for video in videos if video['link'] not in existing_videos]
 
-        insert_query = """
-            INSERT INTO `videos` (`Views`, `link`, `Description`)
-            VALUES (%s, %s, %s);
-        """
-        data_to_insert = [(video['views'], video['link'], video['description']) for video in new_videos]
-        print("oke4")
+        if videos_to_update:
+            update_query = """
+                UPDATE `videos` 
+                SET `Views` = %s
+                WHERE `link` = %s;
+            """
+            data_to_update = [
+                (video['views'], video['link']) 
+                for video in videos_to_update
+            ]
+            cur.executemany(update_query, data_to_update)
+            print(f"{len(videos_to_update)} video berhasil diupdate.")
 
-        cur.executemany(insert_query, data_to_insert)
-        print(f"{len(new_videos)} video baru berhasil diinsert ke database.")
+        if videos_to_insert:
+            insert_query = """
+                INSERT INTO `videos` (`Views`, `link`, `Description`)
+                VALUES (%s, %s, %s);
+            """
+            data_to_insert = [
+                (video['views'], video['link'], video['description']) 
+                for video in videos_to_insert
+            ]
+            cur.executemany(insert_query, data_to_insert)
+            print(f"{len(videos_to_insert)} video baru berhasil diinsert ke database.")
+
+        if not videos_to_insert and not videos_to_update:
+            print("Tidak ada perubahan pada database.")
 
     except Exception as e:
-        print(f"Error saat menginsert video: {e}")
+        print(f"Error saat menginsert atau mengupdate video: {e}")
 
             
 def mysqlconnect():
@@ -74,8 +85,8 @@ def mysqlconnect():
                         print("Invalid data account received from TikTok.")
                 with Video(teardown=True) as bot_videos:
                     bot_videos.open_landing_page(url=BASE_URL_VIDEOS)
-                    # videos = bot_videos.get_all_videos()
-                    videos = bot_videos.get_newest_videos()
+                    videos = bot_videos.get_all_videos()
+                    # videos = bot_videos.get_newest_videos()
                     if all(videos):
                         insert_videos(cur, videos)
                         conn.commit()
