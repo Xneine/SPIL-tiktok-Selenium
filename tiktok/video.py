@@ -4,6 +4,8 @@ import os
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
 import random
 from selenium.webdriver.firefox.options import Options
 
@@ -12,7 +14,6 @@ class Video(webdriver.Firefox):
         self.driver_path = driver_path
         self.teardown = teardown
         os.environ['PATH'] += self.driver_path
-
         firefox_options = Options()
         firefox_options.add_argument('--disable-logging')
         firefox_options.add_argument('--log-level=3')
@@ -21,6 +22,7 @@ class Video(webdriver.Firefox):
         firefox_options.add_argument('--disable-dev-shm-usage')
         # firefox_options.add_argument('--headless')
         super(Video, self).__init__(options=firefox_options)
+        self.maximize_window()
         self.implicitly_wait(5)
 
 
@@ -31,7 +33,7 @@ class Video(webdriver.Firefox):
     def open_landing_page(self, url):
         print(f"Opening {url}...")
         self.get(url)
-        # time.sleep(10)
+        time.sleep(10)
         
     def convert_to_integer(self, value):
         try:
@@ -47,6 +49,15 @@ class Video(webdriver.Firefox):
         except ValueError:
             print(f"Error converting value: {value}")
             return 0
+    
+    def zoom_out(self):
+        # self.execute_script("document.body.style.zoom='25%'")
+        actions = ActionChains(self)
+        for _ in range(8):
+            actions.key_down(Keys.CONTROL).send_keys(Keys.SUBTRACT).key_up(Keys.CONTROL).perform()
+            time.sleep(0.5)  # Kurangi jika respons terlalu lambat
+
+            
         
     def scroll_page(self):
         """Scroll halaman sampai semua elemen dimuat"""
@@ -62,46 +73,18 @@ class Video(webdriver.Firefox):
                 break
             last_height = new_height
 
-    # def scroll_page(self):
-    #     """Scroll halaman secara bertahap untuk mensimulasikan scrolling manual"""
-    #     scroll_pause_time = random.uniform(3, 5)
-    #     scroll_increment = random.randint(350, 500)
-    #     last_height = self.execute_script("return document.body.scrollHeight")
-    #     current_position = 0
-
-    #     while current_position < last_height:
-    #         current_position += scroll_increment
-    #         self.execute_script(f"window.scrollTo(0, {current_position});")
-            
-    #         print(f"Scrolled to position: {current_position}")
-            
-    #         time.sleep(scroll_pause_time)
-            
-    #         new_height = self.execute_script("return document.body.scrollHeight")
-            
-    #         if new_height > last_height:
-    #             last_height = new_height
-    #         elif current_position >= new_height:
-    #             break
-
-
     def get_all_videos(self):
         try:
+            WebDriverWait(self, 30).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, '[data-e2e="user-post-item"]'))
+            )
             print("Fetching all videos...")
-            
+            # time.sleep(5)
+            # self.zoom_out()
             # time.sleep(5)
             self.scroll_page()
             # time.sleep(20)
-            # self.scroll_page()
-            # time.sleep(5)
-            # self.scroll_page()
-            # time.sleep(5)
             
-            
-            WebDriverWait(self, 20).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, '[data-e2e="user-post-item"]'))
-            )
-
             video_elements = self.find_elements(By.CSS_SELECTOR, '[data-e2e="user-post-item"]')
             videos = []
 
@@ -109,10 +92,6 @@ class Video(webdriver.Firefox):
                 try:
                     views = video.find_element(By.CSS_SELECTOR, '[data-e2e="video-views"]').text
                     views_int = self.convert_to_integer(views)
-                    
-                    # like_icon = video.find_element(By.CSS_SELECTOR, '.like-icon')
-                    # like = like_icon.find_element(By.XPATH, './following-sibling::strong').text
-                    # like_int = self.convert_to_integer(like)
                     
                     link = video.find_element(By.TAG_NAME, 'a').get_attribute('href')
                     description = video.find_element(By.TAG_NAME, 'img').get_attribute('alt')

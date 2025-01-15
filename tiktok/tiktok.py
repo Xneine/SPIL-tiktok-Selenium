@@ -31,38 +31,6 @@ class Tiktok(webdriver.Firefox):
         time.sleep(5)
         # self.save_screenshot("page_screenshot.png")
     
-    # def get_followers(self):
-    #     try:
-    #         total_followers = WebDriverWait(self, 20).until(
-    #             EC.presence_of_element_located((By.CSS_SELECTOR, '[data-e2e="followers-count"]'))
-    #         ).text
-    #         print("ok1")
-    #         total_likes = WebDriverWait(self, 20).until(
-    #             EC.presence_of_element_located(
-    #                 (By.XPATH, "//div[h3[text()='Live Likes Count']]/div/span/h5")
-    #             )
-    #         ).text
-    #         print("ok2")
-    #         total_videos = WebDriverWait(self, 20).until(
-    #             EC.presence_of_element_located(
-    #                 (By.XPATH, "//div[h3[text()='Total TikTok Videos']]/div/span/h5")
-    #             )
-    #         ).text
-    #         print("ok3")
-    #         # time.sleep(8)
-    #         f = int(total_followers.replace(",", ""))
-    #         l = int(total_likes.replace(",", ""))
-    #         v = int(total_videos.replace(",", ""))
-    #         result = [
-    #             f,l,v
-    #         ]
-    #         print(f"Total Followers: {total_followers}")
-    #         print(f"Total Likes: {total_likes}")
-    #         print(f"Total Videos: {total_videos}")
-    #         return result
-    #     except Exception as e:
-    #         print(f"Error getting followers: {e}")
-    #         return [None, None, None]
     def get_followers_likes_videos(self):
         try:
             print("Loading page source...")
