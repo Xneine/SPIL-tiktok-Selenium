@@ -61,7 +61,7 @@ class Video(webdriver.Firefox):
         
     def scroll_page(self):
         """Scroll halaman sampai semua elemen dimuat"""
-        scroll_pause_time = 10
+        scroll_pause_time = 20
         last_height = self.execute_script("return document.body.scrollHeight")
         
         while True:
